@@ -16,4 +16,6 @@ model Setting {
   updatedAt DateTime @updatedAt
   key       String   @unique
   value     String
+
+  @@map("settings")
 }
