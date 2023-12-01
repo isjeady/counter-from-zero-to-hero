@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import StoreProvider from "./StoreProvider";
+import TrpcProvider from "./TrpcProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,16 +19,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <StoreProvider>
-        <body className={inter.className}>
-          <nav className="flex justify-center gap-4 border-b border-gray-400 p-4 mx-auto text-center">
-            <Link href="/">Home</Link>
-            <Link href="/counter">Counter</Link>
-          </nav>
+      <TrpcProvider>
+        <StoreProvider>
+          <body className={inter.className}>
+            <nav className="flex justify-center gap-4 border-b border-gray-400 p-4 mx-auto text-center">
+              <Link href="/">Home</Link>
+              <Link href="/counter">Counter</Link>
+            </nav>
 
-          {children}
-        </body>
-      </StoreProvider>
+            {children}
+          </body>
+        </StoreProvider>
+      </TrpcProvider>
     </html>
   );
 }
