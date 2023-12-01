@@ -23,7 +23,7 @@ export async function GET(request: Request) {
         createdAt: new Date(),
         updatedAt: new Date(),
         key: COUNTER,
-        value: "0",
+        value: 0,
       },
     });
   }
@@ -32,6 +32,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const body = await request.json();
+  const decrement = body?.decrement ?? false;
+
   const counter = await prisma.setting
     .findUnique({
       where: {
@@ -49,13 +52,13 @@ export async function POST(request: Request) {
         key: COUNTER,
       },
       update: {
-        value: (parseInt(counter.value) + 1).toString(),
+        value: decrement ? counter.value - 1 : counter.value + 1,
       },
       create: {
         createdAt: new Date(),
         updatedAt: new Date(),
         key: COUNTER,
-        value: "0",
+        value: 0,
       },
     })
     .catch((error) => {

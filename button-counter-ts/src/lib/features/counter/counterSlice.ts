@@ -13,6 +13,9 @@ export const counterSlice = createSlice({
   name: "counter",
   initialState,
   reducers: {
+    setCounterValue: (state, action: PayloadAction<number>) => {
+      state.value = action.payload;
+    },
     increment: (state) => {
       // Redux Toolkit allows us to write "mutating" logic in reducers. It
       // doesn't actually mutate the state because it uses the Immer library,
@@ -30,4 +33,8 @@ export const counterSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { increment, decrement, incrementByAmount } = counterSlice.actions;
+export const { increment, decrement, incrementByAmount, setCounterValue } =
+  counterSlice.actions;
+
+export const selectCounterValue = (state: { counter: CounterState }) =>
+  state.counter.value;

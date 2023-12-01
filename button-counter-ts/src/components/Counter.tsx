@@ -1,22 +1,48 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Button from "./ui/Button";
 import Text from "./ui/Text";
 import { useAppSelector } from "@/lib/hooks";
 import { useDispatch } from "react-redux";
-import { decrement, increment } from "@/lib/features/counter/counterSlice";
+import {
+  decrement,
+  increment,
+  selectCounterValue,
+  setCounterValue,
+} from "@/lib/features/counter/counterSlice";
 
 const Counter = () => {
-  const counterValue = useAppSelector((state) => state.counter.value);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const counterValue = useAppSelector(selectCounterValue);
   const dispatch = useDispatch();
   //const [counter, setCounter] = useState(0);
 
+  useEffect(() => {
+    setLoading(true);
+    fetch("/api/counter")
+      .then((res) => res.json())
+      .then((data) => {
+        dispatch(setCounterValue(data.counter.value));
+        setLoading(false);
+      });
+  }, [dispatch]);
+
   const handleIncrement = () => {
     dispatch(increment());
+    fetch("/api/counter", { method: "POST", body: JSON.stringify({}) });
+    /*   .then((res) => res.json())
+      .then((data) => {
+       dispatch(setCounterValue(data.counter.value));
+      }); */
   };
 
   const handleDecrement = () => {
     dispatch(decrement());
+    fetch("/api/counter", {
+      method: "POST",
+      body: JSON.stringify({ decrement: true }),
+    });
   };
 
   return (
@@ -31,7 +57,7 @@ const Counter = () => {
       </div>
 
       <Text label="Clicks" />
-      <Text label={counterValue} size="large" />
+      <Text label={loading ? "..." : counterValue} size="large" />
     </div>
   );
 };
