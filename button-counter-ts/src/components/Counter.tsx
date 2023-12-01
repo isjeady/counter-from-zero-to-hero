@@ -10,39 +10,46 @@ import {
   selectCounterValue,
   setCounterValue,
 } from "@/lib/features/counter/counterSlice";
+import { trpc } from "@/app/_trpc/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Counter = () => {
-  const [loading, setLoading] = useState<boolean>(true);
+  const utils = trpc.useUtils();
 
-  const counterValue = useAppSelector(selectCounterValue);
-  const dispatch = useDispatch();
-  //const [counter, setCounter] = useState(0);
+  const { data, isLoading, isFetching } =
+    trpc.counterRouter.getCounter.useQuery();
 
-  useEffect(() => {
-    setLoading(true);
-    fetch("/api/counter")
-      .then((res) => res.json())
-      .then((data) => {
-        dispatch(setCounterValue(data.counter.value));
-        setLoading(false);
-      });
-  }, [dispatch]);
+  const { mutate: postCounter, isLoading: isLoadingPost } =
+    trpc.counterRouter.postCounter.useMutation({
+      onSuccess: () => {
+        // utils.counterRouter.getCounter.invalidate();
+      },
+      onMutate({ decrement }) {
+        utils.counterRouter.getCounter.setData(undefined, (oldData) => {
+          return {
+            ...oldData,
+            counter: {
+              ...oldData?.counter,
+              value: decrement
+                ? oldData?.counter?.value - 1
+                : oldData?.counter?.value + 1,
+            },
+          };
+        });
+      },
+      onSettled() {
+        utils.counterRouter.getCounter.invalidate();
+      },
+    });
+
+  const counter = data?.counter?.value ?? 0;
 
   const handleIncrement = () => {
-    dispatch(increment());
-    fetch("/api/counter", { method: "POST", body: JSON.stringify({}) });
-    /*   .then((res) => res.json())
-      .then((data) => {
-       dispatch(setCounterValue(data.counter.value));
-      }); */
+    postCounter({ decrement: false });
   };
 
   const handleDecrement = () => {
-    dispatch(decrement());
-    fetch("/api/counter", {
-      method: "POST",
-      body: JSON.stringify({ decrement: true }),
-    });
+    postCounter({ decrement: true });
   };
 
   return (
@@ -57,7 +64,11 @@ const Counter = () => {
       </div>
 
       <Text label="Clicks" />
-      <Text label={loading ? "..." : counterValue} size="large" />
+      <Text label={isLoading || isFetching ? "..." : counter} size="large" />
+
+      <pre>
+        <code>{JSON.stringify(data, null, 2)}</code>
+      </pre>
     </div>
   );
 };
