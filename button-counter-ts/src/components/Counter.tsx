@@ -26,19 +26,13 @@ const Counter = () => {
       },
       onMutate({ decrement }) {
         utils.counterRouter.getCounter.setData(undefined, (oldData) => {
-          return {
-            ...oldData,
-            counter: {
-              ...oldData?.counter,
-              value: decrement
-                ? oldData?.counter?.value - 1
-                : oldData?.counter?.value + 1,
-            },
-          };
+          if(oldData === undefined) return oldData;
+          oldData.counter.value = decrement ? oldData?.counter?.value - 1 : oldData?.counter?.value + 1;
+          return oldData
         });
       },
       onSettled() {
-        utils.counterRouter.getCounter.invalidate();
+        //utils.counterRouter.getCounter.invalidate();
       },
     });
 
